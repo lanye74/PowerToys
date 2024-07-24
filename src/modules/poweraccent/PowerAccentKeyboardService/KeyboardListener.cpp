@@ -107,10 +107,17 @@ namespace winrt::PowerToys::PowerAccentKeyboardService::implementation
         while (!view.empty())
         {
             auto pos = (std::min)(view.find_first_of(L"\r\n"), view.length());
-            excludedApps.emplace_back(view.substr(0, pos));
-            view.remove_prefix(pos);
+            auto line = view.substr(0, pos);
             view = left_trim<wchar_t>(trim<wchar_t>(view));
+
+            if (line.find(L"//") == 0)
+            {
+                continue;
+            }
+
+            excludedApps.emplace_back(line);
         }
+
         {
             std::lock_guard<std::mutex> lock(m_mutex_excluded_apps);
             m_settings.excludedApps = std::move(excludedApps);
